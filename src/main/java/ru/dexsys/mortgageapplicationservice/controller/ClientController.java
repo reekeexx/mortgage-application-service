@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
@@ -21,7 +22,6 @@ public class ClientController {
 
     private final ClientService clientService;
     private final RestTemplate restTemplate;
-    private final String URI_CALCULATE_SERVICE = "https://mortgage-calculator-service.herokuapp.com/calculate";
 
     @Autowired
     public ClientController(ClientService clientService, RestTemplateBuilder builder) {
@@ -47,7 +47,9 @@ public class ClientController {
 
         double monthlyPayment = 0;
 
-        ResponseEntity<Client> clientResponseEntity = restTemplate.postForEntity(URI_CALCULATE_SERVICE, client, Client.class);
+        ResponseEntity<Client> clientResponseEntity =
+                restTemplate.postForEntity("https://mortgage-calculator-service.herokuapp.com/calculate",
+                        client, Client.class);
         if (clientResponseEntity.getStatusCode().equals(HttpStatus.OK) && clientResponseEntity.getBody() != null) {
             monthlyPayment = clientResponseEntity.getBody().getMonthlyPayment();
         }
@@ -77,5 +79,20 @@ public class ClientController {
             return ResponseEntity.ok(savedClient.get());
         }
         return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<?> handleException(HttpMessageNotReadableException e) {
+        String localDateException = "java.time.LocalDate";
+        String enumGenderException = "ru.dexsys.mortgageapplicationservice.entity.Client$Gender";
+        if (e.getMessage().toLowerCase().contains(localDateException.toLowerCase())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Collections.singletonMap("error", "date format yyyy-mm-dd, example 1999-01-21"));
+        } else if (e.getMessage().toLowerCase().contains(enumGenderException.toLowerCase())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Collections.singletonMap("error", "gender should be MALE or FEMALE"));
+        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Collections.singletonMap("error", e.getMessage()));
     }
 }
