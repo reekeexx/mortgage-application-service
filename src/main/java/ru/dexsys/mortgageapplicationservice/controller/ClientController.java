@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import ru.dexsys.mortgageapplicationservice.entity.Client;
+import ru.dexsys.mortgageapplicationservice.model.CalculateResponse;
 import ru.dexsys.mortgageapplicationservice.service.ClientService;
 
 import javax.validation.Valid;
@@ -45,20 +46,19 @@ public class ClientController {
                     .body(Collections.singletonMap("error", "Client duplicate"));
         }
 
-        double monthlyPayment = 0;
-
-        ResponseEntity<Client> clientResponseEntity =
+        ResponseEntity<CalculateResponse> calculateResponseEntity =
                 restTemplate.postForEntity("https://mortgage-calculator-service.herokuapp.com/calculate",
-                        client, Client.class);
-        if (clientResponseEntity.getStatusCode().equals(HttpStatus.OK) && clientResponseEntity.getBody() != null) {
-            monthlyPayment = clientResponseEntity.getBody().getMonthlyPayment();
-        }
+                        new CalculateResponse(client.getCreditAmount(), client.getDurationInMonths()),
+                        CalculateResponse.class);
 
-        if (client.getSalary() > monthlyPayment * 2) {
-            client.setStatus(Client.MortgageApplicationStatus.APPROVED);
-            client.setMonthlyPayment(monthlyPayment);
-        } else {
-            client.setStatus(Client.MortgageApplicationStatus.DENIED);
+        if (calculateResponseEntity.getStatusCode().equals(HttpStatus.OK) && calculateResponseEntity.getBody() != null) {
+            double monthlyPayment = calculateResponseEntity.getBody().getMonthlyPayment();
+            if (client.getSalary() > monthlyPayment * 2) {
+                client.setStatus(Client.MortgageApplicationStatus.APPROVED);
+                client.setMonthlyPayment(monthlyPayment);
+            } else {
+                client.setStatus(Client.MortgageApplicationStatus.DENIED);
+            }
         }
 
         clientService.saveClient(client);
