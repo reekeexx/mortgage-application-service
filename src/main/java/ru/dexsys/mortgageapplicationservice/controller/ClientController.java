@@ -74,10 +74,16 @@ public class ClientController {
 
     @GetMapping("/application/{id}")
     public ResponseEntity<?> getClientById(@PathVariable("id") String id) {
+        if (id.length() != 36) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Collections.singletonMap("error", "invalid id"));
+        }
+
         Optional<Client> savedClient = clientService.findClientById(id);
         if (savedClient.isPresent()) {
             return ResponseEntity.ok(savedClient.get());
         }
+
         return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
 
