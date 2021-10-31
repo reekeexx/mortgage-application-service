@@ -34,7 +34,7 @@ public class ClientController {
     public ResponseEntity<?> createMortgageApplication(@Valid @RequestBody Client client,
                                                        BindingResult bindingResult) {
 
-        if (bindingResult.hasErrors()) {
+        if (bindingResult.hasFieldErrors() && bindingResult.getFieldError() != null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(Collections.singletonMap("error", bindingResult.getFieldError().getDefaultMessage()));
         }
