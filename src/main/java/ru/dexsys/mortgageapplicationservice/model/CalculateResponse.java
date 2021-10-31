@@ -3,15 +3,17 @@ package ru.dexsys.mortgageapplicationservice.model;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 @Data
 @NoArgsConstructor
 public class CalculateResponse {
 
-    private Double creditAmount;
+    private BigDecimal creditAmount;
     private Integer durationInMonths;
-    private Double monthlyPayment;
+    private BigDecimal monthlyPayment;
 
-    public CalculateResponse(Double creditAmount, Integer durationInMonths) {
+    public CalculateResponse(BigDecimal creditAmount, Integer durationInMonths) {
         this.creditAmount = creditAmount;
         this.durationInMonths = durationInMonths;
     }
