@@ -5,6 +5,9 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
 http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd
 http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd">
-    <include file="classpath:db/changelog/db.changelog-1.0.xml"/>
-    <include file="classpath:db/changelog/db.changelog-1.1.xml"/>
+    <changeSet author="Dmitry Vedischev" id="2">
+        <modifyDataType tableName="clients" columnName="salary" newDataType="number"/>
+        <modifyDataType tableName="clients" columnName="credit_amount" newDataType="number"/>
+        <modifyDataType tableName="clients" columnName="monthly_payment" newDataType="number"/>
+    </changeSet>
 </databaseChangeLog>

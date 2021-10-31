@@ -14,6 +14,7 @@ import ru.dexsys.mortgageapplicationservice.model.CalculateResponse;
 import ru.dexsys.mortgageapplicationservice.service.ClientService;
 
 import javax.validation.Valid;
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Optional;
 
@@ -34,7 +35,7 @@ public class ClientController {
     public ResponseEntity<?> createMortgageApplication(@Valid @RequestBody Client client,
                                                        BindingResult bindingResult) {
 
-        if (bindingResult.hasErrors()) {
+        if (bindingResult.hasFieldErrors() && bindingResult.getFieldError() != null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(Collections.singletonMap("error", bindingResult.getFieldError().getDefaultMessage()));
         }
@@ -52,8 +53,8 @@ public class ClientController {
                         CalculateResponse.class);
 
         if (calculateResponseEntity.getStatusCode().equals(HttpStatus.OK) && calculateResponseEntity.getBody() != null) {
-            double monthlyPayment = calculateResponseEntity.getBody().getMonthlyPayment();
-            if (client.getSalary() > monthlyPayment * 2) {
+            BigDecimal monthlyPayment = calculateResponseEntity.getBody().getMonthlyPayment();
+            if (client.getSalary().compareTo(monthlyPayment.multiply(BigDecimal.valueOf(2))) > 0) {
                 client.setStatus(Client.MortgageApplicationStatus.APPROVED);
                 client.setMonthlyPayment(monthlyPayment);
             } else {
@@ -68,7 +69,7 @@ public class ClientController {
 
         return ResponseEntity.created(
                 ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
-                .build(Collections.singletonMap("id", client.getId()))
+                        .build(Collections.singletonMap("id", client.getId()))
         ).body(client);
     }
 

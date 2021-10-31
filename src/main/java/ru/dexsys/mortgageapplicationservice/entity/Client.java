@@ -8,6 +8,7 @@ import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.UUID;
 
@@ -47,13 +48,13 @@ public class Client {
     @NotNull(message = "salary cannot be null")
     @Min(value = 0, message = "salary min value = 0")
     @Max(value = 1000000000, message = "salary max value = 1000000000")
-    private Double salary;
+    private BigDecimal salary;
 
     @Column(name = "credit_amount")
     @NotNull(message = "creditAmount cannot be null")
     @Min(value = 0, message = "creditAmount min value = 0")
     @Max(value = 1000000000, message = "creditAmount max value = 1000000000")
-    private Double creditAmount;
+    private BigDecimal creditAmount;
 
     @Column(name = "duration_in_months")
     @NotNull(message = "durationInMonths cannot be null")
@@ -67,7 +68,7 @@ public class Client {
 
     @Column(name = "monthly_payment")
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private Double monthlyPayment;
+    private BigDecimal monthlyPayment;
 
     public enum Gender {
         MALE, FEMALE
